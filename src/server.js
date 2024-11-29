@@ -41,12 +41,21 @@ const sockets = [];
 
 wss.on("connection", (socket)=> {
 	sockets.push(socket);
+	socket["nickName"] = "익명";
 	console.log("브라우저와 연결됨");
 	socket.on("close", () => console.log("브라우저와 연결 해제됨."));
-	socket.on("message", (message) => {
-		console.log(message.toString());
-		//socket.send(message.toString());
-		sockets.forEach(existSocket => existSocket.send(`${message}`));
+	socket.on("message", (msg) => {
+		const message = JSON.parse(msg);
+		// console.log(message.type, message.payload); // nickName ㅁㄴㅇㄹ
+
+		console.log(message.payload);
+
+		switch(message.type){
+			case "message": sockets.forEach(existSocket => existSocket.send(`${socket.nickName}: ${message.payload}`));
+			break;
+			case "nickName": socket["nickName"] = message.payload;
+			break;
+		}
 	});
 
 });
