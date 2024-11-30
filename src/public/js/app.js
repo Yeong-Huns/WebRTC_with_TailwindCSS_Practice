@@ -73,6 +73,8 @@ function showRoom(){
 	room.hidden = false;
 	const h3 = room.querySelector("h3");
 	h3.innerText = `채팅방 이름: ${roomName}`
+	const form = room.querySelector("form");
+	form.addEventListener("submit", handleMessageSubmit);
 }
 
 function handleEnterRoom(event){
@@ -83,4 +85,42 @@ function handleEnterRoom(event){
 	input.value = "";
 }
 
+function addMessage(message){
+	const ul = room.querySelector("ul");
+	const li = document.createElement("li");
+	li.innerText = message;
+	ul.appendChild(li);
+}
+
+function announceMessage(message){
+	const ul = room.querySelector("ul");
+	const li = document.createElement("li");
+	li.className = "text-md text-gray-400";
+	li.innerText = message;
+	ul.appendChild(li);
+}
+
+function handleMessageSubmit(event){
+	event.preventDefault();
+	const form = room.querySelector("form");
+	const input = form.querySelector("input");
+	const value = input.value;
+	socket.emit("sendMessage", value, roomName, () => {
+		addMessage(`나 : ${ value }`);
+	})
+	input.value = "";
+}
+
 form.addEventListener("submit",handleEnterRoom);
+
+socket.on("join", ()=> {
+	announceMessage("익명님이 채팅방에 참여하였습니다.");
+});
+
+socket.on("leave", () => {
+	announceMessage("익명님이 채팅방에서 퇴장하셨습니다.")
+});
+
+socket.on("sendMessage", (msg) => {
+	addMessage(`익명: ${msg}`);
+})

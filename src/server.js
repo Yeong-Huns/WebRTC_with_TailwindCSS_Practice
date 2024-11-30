@@ -11,8 +11,6 @@
 import express from "express";
 import http from "http";
 import io from "socket.io";
-import * as util from "node:util";
-
 
 
 const app = express()
@@ -33,14 +31,16 @@ wsServer.on("connection", (socket) => {
 	//console.log(socket);
 	socket.on("enterRoom", (roomName, callback) => {
 		callback();
-		console.log(roomName);
-
-		console.log(`소켓 아이디 : ${socket.id}`);
-		console.log(`소켓 방목록 : ${util.inspect(socket.rooms)}`);
-
 		socket.join(roomName);
-		console.log(`소켓 방목록 : ${util.inspect(socket.rooms)}`);
+		socket.to(roomName).emit("join");
 	});
+	socket.on("disconnecting", () => {
+		socket.rooms.forEach(room => socket.to(room).emit("leave"));
+	});
+	socket.on("sendMessage", (value, room, callback) => {
+		callback();
+		socket.to(room).emit("sendMessage", value);
+	})
 });
 
 const handleListen = () => console.log("3000번 포트에서 실행 중");
