@@ -1,7 +1,3 @@
-import express from 'express';
-import http from "http";
-import WebSocket from 'ws'
-
 /**
  * fileName       : server.js
  * author         : Yeong-Huns
@@ -12,8 +8,12 @@ import WebSocket from 'ws'
  * 2024-11-28        Yeong-Huns       최초 생성
  */
 
+import express from "express";
+import http from "http";
+import io from "socket.io";
+import * as util from "node:util";
 
-//console.log("Hello World")
+
 
 const app = express()
 
@@ -24,43 +24,24 @@ app.use("/public", express.static(__dirname + "/public"))
 
 app.get("/", (req, res) => res.render("home"));
 
-
-const handleListen = () => {
-	console.log('3000번 포트에서 실행중');
-	console.log(__dirname); //C:\WebRTC_practice_project\src
-};
 const port = 3000
-//app.listen(port, handleListen);
 
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const httpServer = http.createServer(app);
+const wsServer = io(httpServer);
 
-// const handleConnection = (socket) => console.log(socket);
+wsServer.on("connection", (socket) => {
+	//console.log(socket);
+	socket.on("enterRoom", (roomName, callback) => {
+		callback();
+		console.log(roomName);
 
-const sockets = [];
+		console.log(`소켓 아이디 : ${socket.id}`);
+		console.log(`소켓 방목록 : ${util.inspect(socket.rooms)}`);
 
-/**
- * @description 웹소켓 연결이 이루어 졌을때 실행되는 이벤트
- */
-wss.on("connection", (socket)=> {
-	sockets.push(socket);
-	socket["nickName"] = "익명";
-	console.log("브라우저와 연결됨");
-	socket.on("close", () => console.log("브라우저와 연결 해제됨."));
-	socket.on("message", (msg) => {
-		const message = JSON.parse(msg);
-		// console.log(message.type, message.payload); // nickName ㅁㄴㅇㄹ
-
-		console.log(message);
-
-		switch(message.type){
-			case "message": sockets.forEach(existSocket => existSocket.send(`${socket.nickName}: ${message.payload}`));
-			break;
-			case "nickName": socket["nickName"] = message.payload;
-			break;
-		}
+		socket.join(roomName);
+		console.log(`소켓 방목록 : ${util.inspect(socket.rooms)}`);
 	});
-
 });
 
-server.listen(port, handleListen)
+const handleListen = () => console.log("3000번 포트에서 실행 중");
+httpServer.listen(port, handleListen)

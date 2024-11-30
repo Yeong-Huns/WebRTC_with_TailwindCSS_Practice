@@ -1,9 +1,10 @@
+/*
 //alert("public/js/app.js")
 
 //const socket = new WebSocket("http://localhost:3000");
 
 const messageList = document.querySelector("ul");
-/*const messageForm = document.querySelector("form");*/
+/!*const messageForm = document.querySelector("form");*!/
 
 const nickNameForm = document.querySelector("#nick");
 const messageForm = document.querySelector("#message");
@@ -25,9 +26,9 @@ socket.addEventListener("close", ()=>{
 	console.log("웹소켓 연결이 해제되었습니다.");
 })
 
-/**
+/!**
  * @description 메세지를 입력받아 웹소켓으로 전송하는 함수
- */
+ *!/
 function handleSubmit(event){
 	event.preventDefault();
 	const input = messageForm.querySelector("input");
@@ -36,9 +37,9 @@ function handleSubmit(event){
 	input.value = "";
 }
 
-/**
+/!**
  * @description 닉네임을 입력받아 웹소켓으로 전송하는 함수
- */
+ *!/
 function handleNickNameSubmit(event){
 	event.preventDefault();
 	const input = nickNameForm.querySelector("input");
@@ -47,10 +48,39 @@ function handleNickNameSubmit(event){
 	input.value = "";
 }
 
-/**
+/!**
  * @description json 문자열 변환
- */
+ *!/
 const makeMessage = (type, payload) => JSON.stringify({type, payload});
 
 messageForm.addEventListener("submit", handleSubmit);
 nickNameForm.addEventListener("submit", handleNickNameSubmit);
+*/
+
+const socket = io();
+
+const enter = document.querySelector("#enter");
+const form = enter.querySelector("form");
+const room = document.querySelector("#room");
+
+
+room.hidden = true;
+
+let roomName;
+
+function showRoom(){
+	enter.hidden = true;
+	room.hidden = false;
+	const h3 = room.querySelector("h3");
+	h3.innerText = `채팅방 이름: ${roomName}`
+}
+
+function handleEnterRoom(event){
+	event.preventDefault();
+	const input = form.querySelector("input");
+	socket.emit("enterRoom", input.value, showRoom);
+	roomName = input.value;
+	input.value = "";
+}
+
+form.addEventListener("submit",handleEnterRoom);
