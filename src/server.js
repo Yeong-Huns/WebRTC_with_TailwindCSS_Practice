@@ -39,6 +39,9 @@ const wss = new WebSocket.Server({ server });
 
 const sockets = [];
 
+/**
+ * @description 웹소켓 연결이 이루어 졌을때 실행되는 이벤트
+ */
 wss.on("connection", (socket)=> {
 	sockets.push(socket);
 	socket["nickName"] = "익명";
@@ -48,7 +51,7 @@ wss.on("connection", (socket)=> {
 		const message = JSON.parse(msg);
 		// console.log(message.type, message.payload); // nickName ㅁㄴㅇㄹ
 
-		console.log(message.payload);
+		console.log(message);
 
 		switch(message.type){
 			case "message": sockets.forEach(existSocket => existSocket.send(`${socket.nickName}: ${message.payload}`));
