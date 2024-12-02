@@ -29,11 +29,16 @@ const wsServer = io(httpServer);
 
 wsServer.on("connection", (socket) => {
 	//console.log(socket);
+	socket["nickName"] = "익명";
 	socket.on("enterRoom", (roomName, callback) => {
 		callback();
 		socket.join(roomName);
 		socket.to(roomName).emit("join");
 	});
+	socket.on("nickName", (nickName, callback) => {
+		callback();
+		socket["nickName"] = nickName;
+	})
 	socket.on("disconnecting", () => {
 		socket.rooms.forEach(room => socket.to(room).emit("leave"));
 	});
